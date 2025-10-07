@@ -95,6 +95,12 @@ async function getFeedbackByUser(userId) {
   return db.feedback.filter((f) => f.userId === userId || f.targetUserId === userId);
 }
 
+// ---------------- History ----------------
+async function getRideHistory() {
+  const db = await readDb();
+  return db.rideHistory;
+}
+
 // ---------------- Users ----------------
 async function getUsers() {
   const db = await readDb();
@@ -167,6 +173,7 @@ module.exports = {
   findRideById,
   updateRide,
   archiveRide,
+  getRideHistory,
   // feedback
   addFeedback,
   getFeedbackAll,

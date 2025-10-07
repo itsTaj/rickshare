@@ -65,6 +65,19 @@ async function listRides(req, res, next) {
   }
 }
 
+/**
+ * GET /api/rides/history
+ * Returns archived ride summaries.
+ */
+async function listRideHistory(req, res, next) {
+  try {
+    const items = await db.getRideHistory();
+    res.json(items);
+  } catch (err) {
+    next(err);
+  }
+}
+
 async function createRide(req, res, next) {
   try {
     const { riderName, pickup, destination } = req.body || {};
@@ -467,4 +480,5 @@ module.exports = {
   liveRideSse,
   // Completion
   completeRide,
+  listRideHistory,
 };
