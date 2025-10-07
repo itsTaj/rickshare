@@ -1,0 +1,67 @@
+<!--
+  RickShare Complete (client/complete.html)
+  Purpose: Show final fare breakdown and confirm payments (mock), with ride summary.
+-->
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>RickShare — Ride Completion</title>
+    <link rel="stylesheet" href="./assets/styles.css" />
+    <style>
+      .panel { background: var(--panel); border: 1px solid #1f2937; border-radius: 0.75rem; padding: 1rem; }
+      table { width: 100%; border-collapse: collapse; }
+      th, td { text-align: left; padding: 0.5rem; border-bottom: 1px solid #1f2937; }
+      .row { display: grid; gap: 0.5rem; }
+      .small { color: var(--muted); }
+    </style>
+  </head>
+  <body>
+    <header class="app-header">
+      <h1>Ride Completion</h1>
+      <p class="subtitle">Finalize ride, confirm payments</p>
+      <p><a href="./index.html" style="color: #fff;">← Back to app</a></p>
+    </header>
+
+    <main class="app-main">
+      <section class="panel">
+        <div class="row">
+          <label for="rideId">Ride ID</label>
+          <input id="rideId" placeholder="Paste ride ID" />
+          <button id="loadBtn" type="button">Load Ride</button>
+        </div>
+      </section>
+
+      <section class="panel">
+        <h2>Summary</h2>
+        <div id="summary"></div>
+      </section>
+
+      <section class="panel">
+        <h2>Fare Breakdown</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>User</th>
+              <th>Amount</th>
+              <th>Payment Method</th>
+              <th>Confirm</th>
+            </tr>
+          </thead>
+          <tbody id="breakdown"></tbody>
+        </table>
+        <div class="row">
+          <button id="completeBtn" type="button">Finalize & Confirm Payments (mock)</button>
+          <small class="small">Confirms with backend and logs to history.</small>
+        </div>
+      </section>
+    </main>
+
+    <footer class="app-footer">
+      <small>Completion uses /api/rides/complete</small>
+    </footer>
+
+    <script type="module" src="./src/complete.js"></script>
+  </body>
+</html>

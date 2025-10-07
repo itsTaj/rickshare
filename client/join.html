@@ -1,0 +1,76 @@
+<!--
+  RickShare Join (client/join.html)
+  Purpose: Discover nearby rides, visualize overlap, and join via QR or map selection.
+-->
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>RickShare — Join Ride</title>
+
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+      integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+      crossorigin=""
+    />
+    <link rel="stylesheet" href="./assets/styles.css" />
+    <style>
+      .sidebar { background: var(--panel); border: 1px solid #1f2937; border-radius: 0.75rem; padding: 1rem; }
+      .ride-item { padding: 0.5rem; border: 1px solid #1f2937; border-radius: 0.5rem; margin-bottom: 0.5rem; }
+      .row { display: grid; gap: 0.25rem; }
+      .small { font-size: 0.85rem; color: var(--muted); }
+    </style>
+  </head>
+  <body>
+    <header class="app-header">
+      <h1>Join a Ride</h1>
+      <p class="subtitle">Find nearby rides and request to join</p>
+      <p><a href="./index.html" style="color: #fff;">← Back to app</a></p>
+    </header>
+
+    <main class="app-main">
+      <section class="map-section">
+        <h2>Map</h2>
+        <div id="map" aria-label="Nearby Rides Map" role="region"></div>
+        <div class="map-actions">
+          <button id="locateBtn" type="button">Locate Me</button>
+          <button id="clearBtn" type="button">Clear Overlays</button>
+        </div>
+      </section>
+
+      <aside class="sidebar">
+        <h2>Nearby</h2>
+        <div class="row">
+          <label for="userId">Your User ID</label>
+          <input id="userId" placeholder="Paste from registration" />
+        </div>
+        <div class="row">
+          <label for="radius">Search radius (km)</label>
+          <input id="radius" type="number" value="3" min="1" step="1" />
+        </div>
+        <div class="row">
+          <button id="scanBtn" type="button">Scan Ride QR</button>
+          <small class="small">Scanner is mocked: enter ride ID manually when prompted.</small>
+        </div>
+        <div class="row">
+          <button id="refreshBtn" type="button">Refresh Nearby</button>
+        </div>
+        <div id="list"></div>
+      </aside>
+    </main>
+
+    <footer class="app-footer">
+      <small>Nearby rides powered by /api/rides/nearby</small>
+    </footer>
+
+    <script
+      src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+      integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+      crossorigin=""
+    ></script>
+
+    <script type="module" src="./src/join.js"></script>
+  </body>
+</html>

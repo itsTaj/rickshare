@@ -1,0 +1,57 @@
+/*
+  RickShare Client Styles (client/assets/styles.css)
+  Purpose: Global styles for the RickShare web client, including map sizing and layout.
+*/
+
+:root {
+  --bg: #0f172a;
+  --panel: #111827;
+  --text: #e5e7eb;
+  --muted: #9ca3af;
+  --accent: #22c55e;
+}
+
+* { box-sizing: border-box; }
+html, body { height: 100%; }
+body {
+  margin: 0;
+  font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, "Noto Sans", "Helvetica Neue", Arial, "Apple Color Emoji", "Segoe UI Emoji";
+  color: var(--text);
+  background: linear-gradient(180deg, #0b1020, var(--bg));
+}
+
+.app-header { padding: 1rem 1.25rem; border-bottom: 1px solid #1f2937; }
+.app-header h1 { margin: 0; font-size: 1.5rem; }
+.subtitle { margin: 0.25rem 0 0; color: var(--muted); }
+
+.app-main { display: grid; gap: 1rem; padding: 1rem 1.25rem; grid-template-columns: 1fr; }
+@media (min-width: 900px) {
+  .app-main { grid-template-columns: 2fr 1fr; }
+}
+
+.map-section, .ride-section, .qr-section {
+  background: var(--panel);
+  border: 1px solid #1f2937;
+  border-radius: 0.75rem;
+  padding: 1rem;
+}
+
+#map {
+  width: 100%;
+  height: 420px; /* Critical: ensure map displays correctly */
+  border-radius: 0.5rem;
+  border: 1px solid #1f2937;
+}
+
+.map-actions { margin-top: 0.5rem; display: flex; gap: 0.5rem; }
+button { cursor: pointer; background: var(--accent); color: #052e16; border: 0; padding: 0.5rem 0.75rem; border-radius: 0.5rem; font-weight: 600; }
+button:hover { filter: brightness(1.05); }
+button:active { transform: translateY(1px); }
+
+.form-row { display: grid; gap: 0.25rem; margin: 0.5rem 0; }
+label { color: var(--muted); font-size: 0.9rem; }
+input { padding: 0.5rem; border-radius: 0.5rem; border: 1px solid #334155; background: #0b1220; color: var(--text); }
+output { display: inline-block; min-width: 10ch; padding: 0.25rem 0.5rem; background: #0b1220; border: 1px solid #334155; border-radius: 0.5rem; }
+
+.app-footer { padding: 0.75rem 1.25rem; color: var(--muted); border-top: 1px solid #1f2937; }
+.app-footer a { color: var(--text); }

@@ -1,0 +1,111 @@
+<!--
+  RickShare Client (client/)
+  Purpose: Frontend UI for the RickShare short-distance rickshaw ride-sharing app.
+  Contains static assets in client/assets and client/src for JS logic.
+-->
+<!doctype html>
+<html lang="en">
+  <head>
+    <!--
+      File: client/index.html
+      Purpose: Root HTML page wiring Leaflet.js, OpenStreetMap tiles, and QR code placeholders.
+      Notes: Uses CDN for Leaflet and qrcode.js to keep setup lightweight.
+    -->
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>RickShare</title>
+
+    <!-- Leaflet CSS (Open-source map rendering) -->
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+      integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+      crossorigin=""
+    />
+
+    <!-- App styles -->
+    <link rel="stylesheet" href="./assets/styles.css" />
+  </head>
+  <body>
+    <header class="app-header">
+      <h1>RickShare</h1>
+      <p class="subtitle">Short-distance rickshaw ride sharing</p>
+    </header>
+
+    <main class="app-main">
+      <section class="map-section">
+        <h2>Map</h2>
+        <!--
+          Element: #map
+          Purpose: Leaflet map container showing OpenStreetMap tiles. Click map to set pickup.
+        -->
+        <div id="map" aria-label="RickShare Map" role="region"></div>
+        <div class="map-actions">
+          <button id="locateBtn" type="button">Locate Me</button>
+          <button id="clearMarkersBtn" type="button">Clear Markers</button>
+        </div>
+      </section>
+
+      <section class="ride-section">
+        <h2>Create Ride (Initiation)</h2>
+        <!--
+          Form: #rideForm
+          Purpose: Initiate a ride by selecting start/end, entering fare, and generating a QR for ride ID.
+        -->
+        <form id="rideForm">
+          <div class="form-row">
+            <label for="userId">User ID</label>
+            <input id="userId" name="userId" placeholder="Paste ID from registration" />
+          </div>
+          <div class="form-row">
+            <label for="riderName">Your name</label>
+            <input id="riderName" name="riderName" placeholder="e.g., Anika" />
+          </div>
+          <div class="form-row">
+            <label>Start (click map)</label>
+            <output id="pickupOutput">not set</output>
+          </div>
+          <div class="form-row">
+            <label>End (click map with Alt/Option key)</label>
+            <output id="destinationOutput">not set</output>
+          </div>
+          <div class="form-row">
+            <label for="fare">Fare</label>
+            <input id="fare" name="fare" type="number" min="1" step="0.5" placeholder="e.g., 50" />
+          </div>
+          <div class="form-actions">
+            <button id="createRideBtn" type="submit">Create Ride</button>
+          </div>
+        </form>
+      </section>
+
+      <section class="qr-section">
+        <h2>Ride QR</h2>
+        <!--
+          Element: #qr
+          Purpose: Placeholder container for qrcode.js output. Will render a QR for the created ride ID.
+        -->
+        <div id="qr" aria-live="polite"></div>
+      </section>
+    </main>
+
+    <footer class="app-footer">
+      <small>
+        Map data © <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a> contributors • Map tiles rendered with Leaflet
+      </small>
+    </footer>
+
+    <!-- Leaflet JS (Open-source map rendering) -->
+    <script
+      src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+      integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+      crossorigin=""
+    ></script>
+
+    <!-- QRCode.js (lightweight QR code generator) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
+    <!-- App script -->
+    <script src="./src/main.js" type="module"></script>
+  </body>
+</html>
