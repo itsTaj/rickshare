@@ -21,6 +21,7 @@ async function readDb() {
   const data = JSON.parse(raw || '{}');
   if (!data.rides) data.rides = [];
   if (!data.users) data.users = [];
+  if (!data.feedback) data.feedback = [];
   if (!data.rideHistory) data.rideHistory = [];
   return data;
 }
@@ -69,6 +70,29 @@ async function archiveRide(id, summary) {
   db.rides[index] = { ...ride, status: 'completed', completedAt: new Date().toISOString() };
   await writeDb(db);
   return historyEntry;
+}
+
+// ---------------- Feedback ----------------
+async function addFeedback(entry) {
+  const db = await readDb();
+  db.feedback.push(entry);
+  await writeDb(db);
+  return entry;
+}
+
+async function getFeedbackAll() {
+  const db = await readDb();
+  return db.feedback;
+}
+
+async function getFeedbackByRide(rideId) {
+  const db = await readDb();
+  return db.feedback.filter((f) => f.rideId === rideId);
+}
+
+async function getFeedbackByUser(userId) {
+  const db = await readDb();
+  return db.feedback.filter((f) => f.userId === userId || f.targetUserId === userId);
 }
 
 // ---------------- Users ----------------
@@ -133,6 +157,11 @@ module.exports = {
   findRideById,
   updateRide,
   archiveRide,
+  // feedback
+  addFeedback,
+  getFeedbackAll,
+  getFeedbackByRide,
+  getFeedbackByUser,
   // users
   getUsers,
   addUser,

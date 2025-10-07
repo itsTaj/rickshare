@@ -11,6 +11,7 @@ const fs = require('fs');
 
 const errorHandler = require('./middleware/errorHandler');
 const ridesRoutes = require('./routes/rides');
+const feedbackRoutes = require('./routes/feedback');
 const usersRoutes = require('./routes/users');
 
 const app = express();
@@ -27,6 +28,8 @@ app.get('/health', (_req, res) => res.json({ ok: true }));
 app.use('/api/rides', ridesRoutes);
 // Users & auth related endpoints
 app.use('/api', usersRoutes);
+// Feedback endpoints
+app.use('/api/feedback', feedbackRoutes);
 
 // Ensure DB file exists at startup
 const dbFile = path.join(__dirname, 'db', 'mock.json');

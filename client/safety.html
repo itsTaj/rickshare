@@ -1,0 +1,87 @@
+<!--
+  RickShare Safety (client/safety.html)
+  Purpose: SOS (mock), post-ride feedback and rating, optional live share link.
+-->
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>RickShare — Safety & Trust</title>
+    <link rel="stylesheet" href="./assets/styles.css" />
+    <style>
+      .panel { background: var(--panel); border: 1px solid #1f2937; border-radius: 0.75rem; padding: 1rem; }
+      .row { display: grid; gap: 0.5rem; grid-template-columns: 1fr; }
+      .inline { display: flex; gap: 0.5rem; align-items: center; }
+      textarea { min-height: 90px; }
+    </style>
+  </head>
+  <body>
+    <header class="app-header">
+      <h1>Safety & Trust</h1>
+      <p class="subtitle">SOS, feedback, and sharing options</p>
+      <p><a href="./index.html" style="color: #fff;">← Back to app</a></p>
+    </header>
+
+    <main class="app-main">
+      <section class="panel">
+        <h2>SOS</h2>
+        <div class="row">
+          <div class="inline">
+            <button id="sosBtn" type="button">Send SOS</button>
+            <output id="sosStatus">Location: unknown</output>
+          </div>
+          <small class="small">Mock: Alerts with your location; in production, notify emergency contacts.</small>
+        </div>
+      </section>
+
+      <section class="panel">
+        <h2>Post-ride Feedback</h2>
+        <div class="row">
+          <label for="rideId">Ride ID</label>
+          <input id="rideId" placeholder="Ride ID" />
+        </div>
+        <div class="row">
+          <label for="userId">Your User ID</label>
+          <input id="userId" placeholder="User ID" />
+        </div>
+        <div class="row">
+          <label for="targetUserId">About (optional, other user)</label>
+          <input id="targetUserId" placeholder="Target User ID (optional)" />
+        </div>
+        <div class="row">
+          <label for="rating">Rating</label>
+          <select id="rating">
+            <option value="5">5 - Excellent</option>
+            <option value="4">4 - Good</option>
+            <option value="3">3 - Okay</option>
+            <option value="2">2 - Poor</option>
+            <option value="1">1 - Bad</option>
+          </select>
+        </div>
+        <div class="row">
+          <label for="comment">Comment</label>
+          <textarea id="comment" placeholder="Share your experience..."></textarea>
+        </div>
+        <div class="row">
+          <button id="submitFeedbackBtn" type="button">Submit Feedback</button>
+        </div>
+      </section>
+
+      <section class="panel">
+        <h2>Share Live Location (optional)</h2>
+        <div class="row">
+          <label for="shareLink">Shareable Link</label>
+          <input id="shareLink" readonly value="" />
+          <small class="small">Mock link to live tracking page. Share with friends/family.</small>
+        </div>
+      </section>
+    </main>
+
+    <footer class="app-footer">
+      <small>Feedback uses /api/feedback</small>
+    </footer>
+
+    <script type="module" src="./src/safety.js"></script>
+  </body>
+</html>
