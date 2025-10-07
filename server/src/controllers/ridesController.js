@@ -6,6 +6,56 @@
 const { v4: uuidv4 } = require('uuid');
 const db = require('../services/db');
 
+// ---------------- Geometry helpers (Haversine + simple projections) ----------------
+function deg2rad(d) {
+  return (d * Math.PI) / 180;
+}
+
+function haversineKm(a, b) {
+  const R = 6371; // Earth radius in km
+  const dLat = deg2rad(b.lat - a.lat);
+  const dLng = deg2rad(b.lng - a.lng);
+  const lat1 = deg2rad(a.lat);
+  const lat2 = deg2rad(b.lat);
+  const sinDLat = Math.sin(dLat / 2);
+  const sinDLng = Math.sin(dLng / 2);
+  const h = sinDLat * sinDLat + Math.cos(lat1) * Math.cos(lat2) * sinDLng * sinDLng;
+  const c = 2 * Math.atan2(Math.sqrt(h), Math.sqrt(1 - h));
+  return R * c;
+}
+
+function getRideRouteCoords(ride) {
+  const start = ride.start || ride.pickup || null;
+  const end = ride.end || ride.destination || null;
+  return { start, end };
+}
+
+function toXYMeters(origin, point) {
+  // Equirectangular approximation to convert lat/lng to local meters
+  const meanLat = deg2rad((origin.lat + point.lat) / 2);
+  const mPerDegLat = 111_132; // approx meters per deg latitude
+  const mPerDegLng = 111_320 * Math.cos(meanLat); // meters per deg longitude
+  const x = (point.lng - origin.lng) * mPerDegLng;
+  const y = (point.lat - origin.lat) * mPerDegLat;
+  return { x, y };
+}
+
+function projectParamOnSegmentMeters(a, b, p) {
+  // a,b,p are objects with x,y in meters, return t in [0,1] and perpendicular distance
+  const vx = b.x - a.x;
+  const vy = b.y - a.y;
+  const wx = p.x - a.x;
+  const wy = p.y - a.y;
+  const vLen2 = vx * vx + vy * vy;
+  if (vLen2 === 0) return { t: 0, d: Math.hypot(wx, wy) };
+  let t = (wx * vx + wy * vy) / vLen2;
+  t = Math.max(0, Math.min(1, t));
+  const projX = a.x + t * vx;
+  const projY = a.y + t * vy;
+  const d = Math.hypot(p.x - projX, p.y - projY);
+  return { t, d };
+}
+
 async function listRides(req, res, next) {
   try {
     const rides = await db.getRides();
@@ -114,10 +164,135 @@ async function updateRide(req, res, next) {
   }
 }
 
+/**
+ * GET /api/rides/nearby?lat=..&lng=..&radiusKm=..
+ * Returns rides whose start is within the specified radius (km).
+ */
+async function nearbyRides(req, res, next) {
+  try {
+    const lat = Number(req.query.lat);
+    const lng = Number(req.query.lng);
+    const radiusKm = Number(req.query.radiusKm || 3);
+    if (!Number.isFinite(lat) || !Number.isFinite(lng)) {
+      return res.status(400).json({ message: 'lat and lng are required numbers' });
+    }
+    const center = { lat, lng };
+
+    const rides = await db.getRides();
+    const candidates = rides
+      .map((r) => {
+        const { start } = getRideRouteCoords(r);
+        if (!start) return null;
+        const distanceKm = haversineKm(center, start);
+        return { ride: r, distanceKm };
+      })
+      .filter(Boolean)
+      .filter((item) => item.distanceKm <= radiusKm)
+      .sort((a, b) => a.distanceKm - b.distanceKm)
+      .map(({ ride, distanceKm }) => ({
+        id: ride.id,
+        userId: ride.userId || null,
+        start: getRideRouteCoords(ride).start,
+        end: getRideRouteCoords(ride).end,
+        fare: ride.fare || null,
+        status: ride.status,
+        distanceKm,
+      }));
+
+    res.json(candidates);
+  } catch (err) {
+    next(err);
+  }
+}
+
+/**
+ * POST /api/rides/join
+ * Body: { rideId, userId, joinStart: {lat,lng}, joinEnd: {lat,lng} }
+ * Logic: Approximates overlap by projecting join points onto the ride segment
+ *        and computing overlapped distance. Fare share is proportional to overlap.
+ */
+async function joinRide(req, res, next) {
+  try {
+    const { rideId, userId, joinStart, joinEnd } = req.body || {};
+    if (!rideId || typeof rideId !== 'string') {
+      return res.status(400).json({ message: 'rideId is required' });
+    }
+    if (!userId || typeof userId !== 'string') {
+      return res.status(400).json({ message: 'userId is required' });
+    }
+    if (!joinStart || typeof joinStart.lat !== 'number' || typeof joinStart.lng !== 'number') {
+      return res.status(400).json({ message: 'joinStart {lat, lng} is required' });
+    }
+    if (!joinEnd || typeof joinEnd.lat !== 'number' || typeof joinEnd.lng !== 'number') {
+      return res.status(400).json({ message: 'joinEnd {lat, lng} is required' });
+    }
+
+    const ride = await db.findRideById(rideId);
+    if (!ride) return res.status(404).json({ message: 'Ride not found' });
+    const { start, end } = getRideRouteCoords(ride);
+    if (!start || !end) {
+      return res.status(400).json({ message: 'Ride route is incomplete (start/end required)' });
+    }
+
+    // Compute overlap using local meter projection
+    const a = { x: 0, y: 0 };
+    const b = toXYMeters(start, end);
+    const s = toXYMeters(start, joinStart);
+    const e = toXYMeters(start, joinEnd);
+    const { t: tS, d: dS } = projectParamOnSegmentMeters(a, b, s);
+    const { t: tE, d: dE } = projectParamOnSegmentMeters(a, b, e);
+
+    const MAX_OFFSET_M = 400; // allow ~400m corridor to consider as overlapping
+    if (dS > MAX_OFFSET_M || dE > MAX_OFFSET_M) {
+      return res.status(400).json({ message: 'Join points are too far from the route' });
+    }
+
+    const tStart = Math.min(tS, tE);
+    const tEnd = Math.max(tS, tE);
+    const segLenM = Math.hypot(b.x - a.x, b.y - a.y);
+    const overlapM = Math.max(0, tEnd - tStart) * segLenM;
+    const overlapKm = overlapM / 1000;
+    const routeKm = haversineKm(start, end);
+    const proportion = routeKm > 0 ? Math.min(1, overlapKm / routeKm) : 0;
+    const baseFare = Number(ride.fare || 0);
+    const estimatedShare = baseFare > 0 ? +(baseFare * proportion).toFixed(2) : 0;
+
+    // Persist passenger info
+    const passengers = Array.isArray(ride.passengers) ? ride.passengers : [];
+    const passengerEntry = {
+      userId,
+      joinStart,
+      joinEnd,
+      overlapKm: +overlapKm.toFixed(3),
+      shareFare: estimatedShare,
+      joinedAt: new Date().toISOString(),
+    };
+
+    const updated = await db.updateRide(rideId, {
+      passengers: [...passengers, passengerEntry],
+      updatedAt: new Date().toISOString(),
+    });
+
+    res.json({
+      rideId: ride.id,
+      routeKm: +routeKm.toFixed(3),
+      overlapKm: +overlapKm.toFixed(3),
+      proportion: +proportion.toFixed(3),
+      estimatedShare,
+      passenger: passengerEntry,
+      ride: updated,
+    });
+  } catch (err) {
+    next(err);
+  }
+}
+
 module.exports = {
   listRides,
   createRide,
   createRideInit,
+  nearbyRides,
+  joinRide,
   getRide,
   updateRide,
 };
