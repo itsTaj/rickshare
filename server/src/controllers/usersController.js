@@ -80,14 +80,20 @@ async function login(req, res, next) {
 
 /**
  * GET /profile/:id
- * Returns the user's profile object or null if not set.
+ * Returns the user's basic account info plus profile and wallets.
  */
 async function getProfile(req, res, next) {
   try {
     const { id } = req.params;
     const user = await db.findUserById(id);
     if (!user) return res.status(404).json({ message: 'User not found' });
-    res.json({ profile: user.profile || null });
+    res.json({
+      id: user.id,
+      email: user.email || null,
+      phone: user.phone || null,
+      profile: user.profile || null,
+      wallets: user.wallets || [],
+    });
   } catch (err) {
     next(err);
   }
@@ -95,25 +101,40 @@ async function getProfile(req, res, next) {
 
 /**
  * POST /profile/:id
- * Body: { name: string, photoUrl?: string, emergencyContact?: string }
+ * Body (any subset allowed): {
+ *   name?: string,
+ *   photoUrl?: string,          // can be a data URL from client for demo uploads
+ *   emergencyContacts?: string[],
+ *   emergencyContact?: string,  // legacy single contact
+ *   email?: string,
+ *   phone?: string
+ * }
  */
 async function setProfile(req, res, next) {
   try {
     const { id } = req.params;
-    const { name, photoUrl, emergencyContact } = req.body || {};
+    const { name, photoUrl, emergencyContacts, emergencyContact, email, phone } = req.body || {};
 
-    if (!name || typeof name !== 'string') {
-      return res.status(400).json({ message: 'name is required' });
+    const user = await db.findUserById(id);
+    if (!user) return res.status(404).json({ message: 'User not found' });
+
+    const currentProfile = user.profile || {};
+    const nextProfile = { ...currentProfile };
+    if (typeof name === 'string' && name.trim().length > 0) nextProfile.name = name.trim();
+    if (typeof photoUrl === 'string' && photoUrl) nextProfile.photoUrl = photoUrl;
+
+    if (Array.isArray(emergencyContacts)) {
+      nextProfile.emergencyContacts = emergencyContacts.filter((c) => typeof c === 'string' && c.trim().length > 0);
+    } else if (typeof emergencyContact === 'string' && emergencyContact.trim().length > 0) {
+      nextProfile.emergencyContacts = [emergencyContact.trim()];
     }
 
-    const updated = await db.setUserProfile(id, {
-      name,
-      photoUrl: photoUrl || null,
-      emergencyContact: emergencyContact || null,
-    });
+    const updates = { profile: nextProfile, updatedAt: new Date().toISOString() };
+    if (typeof email === 'string') updates.email = email.trim();
+    if (typeof phone === 'string') updates.phone = phone.trim();
 
-    if (!updated) return res.status(404).json({ message: 'User not found' });
-    res.json(updated);
+    const updatedUser = await db.updateUser(id, updates);
+    res.json(updatedUser);
   } catch (err) {
     next(err);
   }

@@ -1,0 +1,88 @@
+<!--
+  RickShare Profile (client/profile.html)
+  Purpose: Edit name/email/phone, upload photo (data URL), manage emergency contacts, link wallets.
+-->
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>RickShare — Profile</title>
+    <link rel="stylesheet" href="./assets/styles.css" />
+    <style>
+      .panel { background: var(--panel); border: 1px solid #1f2937; border-radius: 0.75rem; padding: 1rem; max-width: 800px; margin: 1rem auto; }
+      .row { display: grid; gap: 0.5rem; grid-template-columns: 1fr; }
+      img.avatar { width: 96px; height: 96px; border-radius: 50%; object-fit: cover; border: 1px solid #1f2937; }
+      .inline { display: flex; gap: 0.5rem; align-items: center; }
+      .list { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+      .pill { padding: 4px 8px; border: 1px solid #334155; border-radius: 999px; }
+    </style>
+  </head>
+  <body>
+    <main>
+      <section class="panel">
+        <h1>Profile</h1>
+        <div id="userIdRow">User: —</div>
+      </section>
+
+      <section class="panel">
+        <h2>Account</h2>
+        <div class="row">
+          <label for="name">Name</label>
+          <input id="name" placeholder="Your name" />
+        </div>
+        <div class="row">
+          <label for="email">Email</label>
+          <input id="email" type="email" placeholder="you@example.com" />
+        </div>
+        <div class="row">
+          <label for="phone">Phone</label>
+          <input id="phone" type="tel" placeholder="+8801..." />
+        </div>
+        <div class="row">
+          <button id="saveAccountBtn" type="button">Save Account</button>
+        </div>
+      </section>
+
+      <section class="panel">
+        <h2>Profile Photo</h2>
+        <div class="inline">
+          <img id="avatar" class="avatar" alt="avatar" src="" />
+          <input id="photoInput" type="file" accept="image/*" />
+          <button id="savePhotoBtn" type="button">Save Photo</button>
+        </div>
+      </section>
+
+      <section class="panel">
+        <h2>Emergency Contacts</h2>
+        <div class="inline">
+          <input id="contactInput" placeholder="+8801..." />
+          <button id="addContactBtn" type="button">Add</button>
+        </div>
+        <div id="contacts" class="list"></div>
+        <div class="row">
+          <button id="saveContactsBtn" type="button">Save Contacts</button>
+        </div>
+      </section>
+
+      <section class="panel">
+        <h2>Link Wallet</h2>
+        <div class="inline">
+          <select id="provider">
+            <option value="bKash">bKash</option>
+            <option value="Nagad">Nagad</option>
+          </select>
+          <input id="account" placeholder="Account number" />
+          <button id="linkWalletBtn" type="button">Link</button>
+        </div>
+        <div id="wallets" class="list"></div>
+      </section>
+
+      <section class="panel">
+        <a href="./dashboard.html" style="color:#fff;">← Back to Dashboard</a>
+      </section>
+    </main>
+
+    <script type="module" src="./src/profile.js"></script>
+  </body>
+</html>
