@@ -78,6 +78,27 @@ async function listRideHistory(req, res, next) {
   }
 }
 
+/**
+ * GET /api/rides/dashboard?userId=...
+ * Returns rides relevant to a user for dashboard display:
+ * - owned rides (userId matches ride.userId)
+ * - joined rides (user present in passengers)
+ */
+async function listRidesForDashboard(req, res, next) {
+  try {
+    const userId = req.query.userId || '';
+    const rides = await db.getRides();
+    if (!userId) return res.json(rides);
+    const owned = rides.filter((r) => r.userId === userId);
+    const joined = rides.filter((r) => Array.isArray(r.passengers) && r.passengers.some((p) => p.userId === userId));
+    const combinedMap = new Map();
+    [...owned, ...joined].forEach((r) => combinedMap.set(r.id, r));
+    res.json([...combinedMap.values()]);
+  } catch (err) {
+    next(err);
+  }
+}
+
 async function createRide(req, res, next) {
   try {
     const { riderName, pickup, destination } = req.body || {};
@@ -481,4 +502,5 @@ module.exports = {
   // Completion
   completeRide,
   listRideHistory,
+  listRidesForDashboard,
 };

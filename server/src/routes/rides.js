@@ -10,6 +10,7 @@
  *   POST   /api/rides/complete   -> finalize ride, compute fare breakdown
  *   GET    /api/rides/live/:id   -> SSE live updates (simulated)
  *   GET    /api/rides/history    -> list archived ride summaries
+ *   GET    /api/rides/dashboard  -> list rides for dashboard (by userId)
  *   GET    /api/rides/:id        -> get ride by id
  *   PATCH  /api/rides/:id        -> update ride (status/destination)
  */
@@ -27,6 +28,7 @@ router.post('/join', controller.joinRide);
 router.post('/complete', controller.completeRide);
 router.get('/live/:id', controller.liveRideSse);
 router.get('/history', controller.listRideHistory);
+router.get('/dashboard', controller.listRidesForDashboard);
 router.get('/:id', controller.getRide);
 router.patch('/:id', controller.updateRide);
 
