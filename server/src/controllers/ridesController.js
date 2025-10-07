@@ -288,6 +288,79 @@ async function joinRide(req, res, next) {
 }
 
 /**
+ * POST /api/rides/complete
+ * Body: { rideId, payments?: Array<{ userId, method: 'wallet'|'cash', amount:number }> }
+ * Logic: Finalizes ride, recomputes simple distance-based fares and archives summary.
+ */
+async function completeRide(req, res, next) {
+  try {
+    const { rideId, payments } = req.body || {};
+    if (!rideId || typeof rideId !== 'string') {
+      return res.status(400).json({ message: 'rideId is required' });
+    }
+    const ride = await db.findRideById(rideId);
+    if (!ride) return res.status(404).json({ message: 'Ride not found' });
+
+    const { start, end } = getRideRouteCoords(ride);
+    if (!start || !end) {
+      return res.status(400).json({ message: 'Ride route is incomplete (start/end required)' });
+    }
+
+    const routeKm = haversineKm(start, end);
+    const baseFare = Number(ride.fare || 0);
+    const passengers = Array.isArray(ride.passengers) ? ride.passengers : [];
+
+    // Compute shares proportional to overlapKm; if none, equal split among participants
+    const overlaps = passengers.map((p) => Number(p.overlapKm || 0));
+    const totalOverlap = overlaps.reduce((a, b) => a + b, 0);
+    const participants = [ride.userId, ...passengers.map((p) => p.userId)].filter(Boolean);
+    const uniqueParticipants = Array.from(new Set(participants));
+
+    const breakdown = [];
+    if (baseFare > 0) {
+      if (totalOverlap > 0) {
+        // Proportional to overlap
+        // Owner share is what's left after passenger overlaps proportionally to owner full route
+        const ownerOverlap = routeKm; // owner's full route considered
+        const denom = ownerOverlap + totalOverlap;
+        const shares = new Map();
+        // Owner share
+        shares.set(ride.userId || 'owner', +(baseFare * (ownerOverlap / denom)).toFixed(2));
+        // Passenger shares
+        passengers.forEach((p, i) => {
+          const s = +(baseFare * (overlaps[i] / denom)).toFixed(2);
+          shares.set(p.userId, (shares.get(p.userId) || 0) + s);
+        });
+        shares.forEach((amount, userId) => breakdown.push({ userId, amount }));
+      } else {
+        // Equal split among unique participants
+        const per = +(baseFare / Math.max(1, uniqueParticipants.length)).toFixed(2);
+        uniqueParticipants.forEach((u) => breakdown.push({ userId: u, amount: per }));
+      }
+    }
+
+    // Attach payment methods if provided (mock)
+    const paymentsApplied = (payments || []).map((p) => ({ ...p, status: 'confirmed' }));
+
+    const summary = {
+      rideId: ride.id,
+      ownerUserId: ride.userId || null,
+      baseFare,
+      routeKm: +routeKm.toFixed(3),
+      participants: uniqueParticipants,
+      breakdown,
+      payments: paymentsApplied,
+      completedAt: new Date().toISOString(),
+    };
+
+    const history = await db.archiveRide(ride.id, summary);
+    res.json({ summary: history });
+  } catch (err) {
+    next(err);
+  }
+}
+
+/**
  * GET /api/rides/live/:id
  * Server-Sent Events stream that emits simulated live updates for a ride.
  * This demo simulates two users moving along the route and projects each
@@ -392,4 +465,6 @@ module.exports = {
   updateRide,
   // SSE live updates
   liveRideSse,
+  // Completion
+  completeRide,
 };

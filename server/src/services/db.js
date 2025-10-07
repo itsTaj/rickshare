@@ -21,6 +21,7 @@ async function readDb() {
   const data = JSON.parse(raw || '{}');
   if (!data.rides) data.rides = [];
   if (!data.users) data.users = [];
+  if (!data.rideHistory) data.rideHistory = [];
   return data;
 }
 
@@ -55,6 +56,19 @@ async function updateRide(id, updates) {
   db.rides[index] = updated;
   await writeDb(db);
   return updated;
+}
+
+async function archiveRide(id, summary) {
+  const db = await readDb();
+  const index = db.rides.findIndex((r) => r.id === id);
+  if (index === -1) return null;
+  const ride = db.rides[index];
+  const historyEntry = { ...summary, rideId: ride.id };
+  db.rideHistory.push(historyEntry);
+  // Optionally remove from active rides; for demo we keep it but mark completed
+  db.rides[index] = { ...ride, status: 'completed', completedAt: new Date().toISOString() };
+  await writeDb(db);
+  return historyEntry;
 }
 
 // ---------------- Users ----------------
@@ -118,6 +132,7 @@ module.exports = {
   addRide,
   findRideById,
   updateRide,
+  archiveRide,
   // users
   getUsers,
   addUser,
