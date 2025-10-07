@@ -1,0 +1,37 @@
+<!--
+  RickShare Dashboard (client/dashboard.html)
+  Purpose: Landing page after registration/login showing the stored User ID.
+-->
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>RickShare — Dashboard</title>
+    <link rel="stylesheet" href="./assets/styles.css" />
+    <style>
+      .panel { background: var(--panel); border: 1px solid #1f2937; border-radius: 0.75rem; padding: 1rem; max-width: 720px; margin: 2rem auto; }
+      .links a { color: #fff; display: inline-block; margin-right: 0.75rem; }
+      .row { display: grid; gap: 0.5rem; }
+    </style>
+  </head>
+  <body>
+    <main>
+      <section class="panel">
+        <h1>Dashboard</h1>
+        <div class="row">
+          <div id="userInfo">Loading user...</div>
+        </div>
+        <div class="row links">
+          <a href="./index.html">Create Ride</a>
+          <a href="./join.html">Join Ride</a>
+          <a href="./live.html">Live</a>
+          <a href="./complete.html">Complete</a>
+          <a href="./safety.html">Safety</a>
+        </div>
+      </section>
+    </main>
+
+    <script type="module" src="./src/dashboard.js"></script>
+  </body>
+</html>

@@ -14,6 +14,7 @@ const controller = require('../controllers/usersController');
 const router = express.Router();
 
 router.post('/register', controller.register);
+router.post('/login', controller.login);
 router.get('/profile/:id', controller.getProfile);
 router.post('/profile/:id', controller.setProfile);
 router.post('/link-wallet/:id', controller.linkWallet);

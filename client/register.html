@@ -26,22 +26,30 @@
 
     <main class="app-main">
       <section class="card">
-        <h2>Step 1: Email + OTP (mocked)</h2>
+        <h2>Register</h2>
         <div class="grid">
+          <div class="row">
+            <label for="name">Name</label>
+            <input id="name" placeholder="Your name" />
+          </div>
           <div class="row">
             <label for="email">Email</label>
             <input id="email" type="email" placeholder="you@example.com" />
           </div>
           <div class="row">
-            <div class="inline">
-              <input id="otp" placeholder="123456 (mock)" />
-              <button id="sendOtpBtn" type="button">Send OTP</button>
-              <button id="verifyOtpBtn" type="button">Verify & Register</button>
-            </div>
-            <small class="muted">OTP is mocked. Any value passes.</small>
+            <label for="phone">Phone</label>
+            <input id="phone" type="tel" placeholder="+8801..." />
           </div>
           <div class="row">
-            <output id="userIdOut">user: not registered</output>
+            <label for="password">Password or OTP (mock)</label>
+            <input id="password" type="password" placeholder="••••••" />
+          </div>
+          <div class="row">
+            <button id="registerBtn" type="button">Register</button>
+            <small class="muted">Generates a persistent User ID in backend mock.json</small>
+          </div>
+          <div class="row center">
+            <a href="./login.html">Already have an account? Login</a>
           </div>
         </div>
       </section>
@@ -92,6 +100,6 @@
       <small>Mock registration UI. Backend at http://localhost:4000/api</small>
     </footer>
 
-    <script type="module" src="./src/register.js"></script>
+    <script type="module" src="./src/register_refactored.js"></script>
   </body>
 </html>

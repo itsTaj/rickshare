@@ -1,0 +1,42 @@
+<!--
+  RickShare Login (client/login.html)
+  Purpose: Dedicated login page with email/phone + password/OTP, redirects to dashboard.
+-->
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>RickShare — Login</title>
+    <link rel="stylesheet" href="./assets/styles.css" />
+    <style>
+      .panel { background: var(--panel); border: 1px solid #1f2937; border-radius: 0.75rem; padding: 1rem; max-width: 520px; margin: 2rem auto; }
+      .row { display: grid; gap: 0.5rem; }
+      .center { text-align: center; }
+    </style>
+  </head>
+  <body>
+    <main>
+      <section class="panel">
+        <h1 class="center">Login</h1>
+        <div class="row">
+          <label for="identifier">Email or Phone</label>
+          <input id="identifier" placeholder="you@example.com or +8801..." />
+        </div>
+        <div class="row">
+          <label for="secret">Password or OTP (mock)</label>
+          <input id="secret" type="password" placeholder="••••••" />
+        </div>
+        <div class="row">
+          <button id="loginBtn" type="button">Login</button>
+          <small class="small">Mock login. Any password/OTP accepted unless a stored mock password exists.</small>
+        </div>
+        <div class="row center">
+          <a href="./register.html">Need an account? Register</a>
+        </div>
+      </section>
+    </main>
+
+    <script type="module" src="./src/login.js"></script>
+  </body>
+</html>

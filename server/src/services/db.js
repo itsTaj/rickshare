@@ -118,6 +118,16 @@ async function findUserByEmail(email) {
   return db.users.find((u) => u.email === email) || null;
 }
 
+async function findUserByPhone(phone) {
+  const db = await readDb();
+  return db.users.find((u) => u.phone === phone) || null;
+}
+
+async function findUserByEmailOrPhone(identifier) {
+  const db = await readDb();
+  return db.users.find((u) => u.email === identifier || u.phone === identifier) || null;
+}
+
 async function updateUser(id, updates) {
   const db = await readDb();
   const index = db.users.findIndex((u) => u.id === id);
@@ -167,6 +177,8 @@ module.exports = {
   addUser,
   findUserById,
   findUserByEmail,
+  findUserByPhone,
+  findUserByEmailOrPhone,
   updateUser,
   setUserProfile,
   linkUserWallet,
