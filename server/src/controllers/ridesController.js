@@ -287,6 +287,101 @@ async function joinRide(req, res, next) {
   }
 }
 
+/**
+ * GET /api/rides/live/:id
+ * Server-Sent Events stream that emits simulated live updates for a ride.
+ * This demo simulates two users moving along the route and projects each
+ * passenger's progress along the route as well.
+ */
+async function liveRideSse(req, res, next) {
+  try {
+    const { id } = req.params;
+    const ride = await db.findRideById(id);
+    if (!ride) return res.status(404).json({ message: 'Ride not found' });
+
+    const { start, end } = getRideRouteCoords(ride);
+    if (!start || !end) {
+      return res.status(400).json({ message: 'Ride route is incomplete (start/end required)' });
+    }
+
+    // SSE headers
+    res.setHeader('Content-Type', 'text/event-stream');
+    res.setHeader('Cache-Control', 'no-cache');
+    res.setHeader('Connection', 'keep-alive');
+    res.flushHeaders?.();
+
+    const originMetersA = { x: 0, y: 0 };
+    const originMetersB = toXYMeters(start, end);
+    const segLenM = Math.hypot(originMetersB.x - originMetersA.x, originMetersB.y - originMetersA.y);
+
+    // Precompute passenger projections for nicer progress mapping
+    const passengerParams = Array.isArray(ride.passengers)
+      ? ride.passengers.map((p) => {
+          const s = toXYMeters(start, p.joinStart || start);
+          const e = toXYMeters(start, p.joinEnd || end);
+          const { t: tS } = projectParamOnSegmentMeters(originMetersA, originMetersB, s);
+          const { t: tE } = projectParamOnSegmentMeters(originMetersA, originMetersB, e);
+          const tStart = Math.min(tS, tE);
+          const tEnd = Math.max(tS, tE);
+          return { userId: p.userId, tStart, tEnd };
+        })
+      : [];
+
+    let t = 0; // param along route [0..1]
+    let tick = 0;
+    const step = 0.02; // ~50 ticks to reach end
+
+    function lerp(a, b, u) {
+      return a + (b - a) * u;
+    }
+    function pointOnRoute(u) {
+      return { lat: lerp(start.lat, end.lat, u), lng: lerp(start.lng, end.lng, u) };
+    }
+
+    const interval = setInterval(() => {
+      t += step;
+      if (t > 1) t = 0; // loop for demo
+      tick += 1;
+
+      const user1 = pointOnRoute(t);
+      const user2 = pointOnRoute(Math.max(0, t - 0.2)); // trail behind
+
+      const passengersProgress = passengerParams.map((pp) => {
+        // Map global t to passenger segment [tStart,tEnd]
+        const u = Math.min(pp.tEnd, Math.max(pp.tStart, t));
+        const pt = pointOnRoute(u);
+        // percent along passenger's own segment
+        const progress = pp.tEnd > pp.tStart ? (u - pp.tStart) / (pp.tEnd - pp.tStart) : 0;
+        return { userId: pp.userId, progress: +progress.toFixed(3), lat: pt.lat, lng: pt.lng };
+      });
+
+      const payload = {
+        rideId: ride.id,
+        tick,
+        t: +t.toFixed(3),
+        route: { start, end, lengthKm: +((segLenM / 1000).toFixed(3)) },
+        moving: {
+          user1,
+          user2,
+        },
+        passengers: passengersProgress,
+      };
+
+      res.write(`event: tick\n`);
+      res.write(`data: ${JSON.stringify(payload)}\n\n`);
+    }, 1000);
+
+    req.on('close', () => {
+      clearInterval(interval);
+      try {
+        res.end();
+      } catch (_e) {}
+    });
+  } catch (err) {
+    next(err);
+  }
+}
+
 module.exports = {
   listRides,
   createRide,
@@ -295,4 +390,6 @@ module.exports = {
   joinRide,
   getRide,
   updateRide,
+  // SSE live updates
+  liveRideSse,
 };
