@@ -1,0 +1,108 @@
+<!--
+  RickShare Dashboard (client/dashboard.html)
+  Purpose: Landing page after registration/login showing the stored User ID.
+-->
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>RickShare — Dashboard</title>
+    <link rel="stylesheet" href="./assets/styles.css" />
+    <style>
+      .panel { background: var(--panel); border: 1px solid #1f2937; border-radius: 0.75rem; padding: 1rem; max-width: 720px; margin: 2rem auto; }
+      .links a { color: #fff; display: inline-block; margin-right: 0.75rem; }
+      .row { display: grid; gap: 0.5rem; }
+      #dashCreateMap, #dashJoinMap { height: 300px; border: 1px solid #1f2937; border-radius: 8px; }
+    </style>
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+      integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+      crossorigin=""
+    />
+  </head>
+  <body>
+    <main>
+      <section class="panel">
+        <h1>Dashboard</h1>
+        <div class="row">
+          <div id="userInfo">Loading user...</div>
+        </div>
+        <div class="row links">
+          <a href="./index.html">Create Ride</a>
+          <a href="./join.html">Join Ride</a>
+          <a href="./live.html">Live Tracking</a>
+          <a href="./complete.html">Ride Completion</a>
+          <a href="./safety.html">Safety</a>
+          <a href="./profile.html">Profile</a>
+        </div>
+      </section>
+
+      <section class="panel">
+        <h2>Quick Create Ride (User 1)</h2>
+        <div class="row">
+          <div id="dashCreateMap"></div>
+        </div>
+        <div class="row">
+          <div>Start: <output id="dashStartOut">not set</output></div>
+          <div>End: <output id="dashEndOut">not set</output></div>
+        </div>
+        <div class="row">
+          <label for="dashFare">Fare</label>
+          <input id="dashFare" type="number" min="1" step="0.5" placeholder="e.g., 50" />
+        </div>
+        <div class="row">
+          <button id="dashCreateBtn" type="button">Create Ride</button>
+        </div>
+        <div class="row">
+          <div>Ride ID: <output id="dashRideIdOut">—</output></div>
+          <div id="dashCreateQR"></div>
+        </div>
+      </section>
+
+      <section class="panel">
+        <h2>Quick Join Ride (User 2)</h2>
+        <div class="row">
+          <div id="dashJoinMap"></div>
+        </div>
+        <div class="row">
+          <div>Join start: <output id="dashJoinStartOut">not set</output></div>
+          <div>Join end: <output id="dashJoinEndOut">not set</output></div>
+        </div>
+        <div class="row">
+          <label for="dashRideId">Ride ID</label>
+          <input id="dashRideId" placeholder="Paste or scan Ride ID" />
+          <button id="dashScanBtn" type="button">Scan Ride QR (mock)</button>
+        </div>
+        <div class="row">
+          <button id="dashJoinBtn" type="button">Join Ride</button>
+        </div>
+      </section>
+
+      <section class="panel">
+        <h2>Ongoing Rides</h2>
+        <div class="row">
+          <button id="refreshRidesBtn" type="button">Refresh</button>
+        </div>
+        <div id="ridesList"></div>
+      </section>
+
+      <section class="panel">
+        <h2>Ride History</h2>
+        <div class="row">
+          <button id="refreshHistoryBtn" type="button">Refresh</button>
+        </div>
+        <div id="historyList"></div>
+      </section>
+    </main>
+
+    <script
+      src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+      integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+      crossorigin=""
+    ></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <script type="module" src="./src/dashboard.js"></script>
+  </body>
+</html>

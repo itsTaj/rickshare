@@ -1,0 +1,40 @@
+{
+  "users": [
+    {
+      "id": "97b202c2-f61b-4c48-94cf-4004649c7811",
+      "email": "jannatultajrianjt@gmail.com",
+      "profile": null,
+      "wallets": [],
+      "createdAt": "2025-10-07T09:48:12.849Z",
+      "updatedAt": "2025-10-07T09:48:12.849Z"
+    },
+    {
+      "id": "b05c13b3-839a-4761-a070-fe65dbc1e396",
+      "email": "sfa@gmail.com",
+      "profile": null,
+      "wallets": [],
+      "createdAt": "2025-10-07T09:49:47.161Z",
+      "updatedAt": "2025-10-07T09:49:47.161Z"
+    }
+  ],
+  "rides": [
+    {
+      "id": "26013f4a-1a66-4ad8-95a9-9e40d13982af",
+      "userId": "anonymous",
+      "start": {
+        "lat": -23.28121440289279,
+        "lng": 16.83616975436599
+      },
+      "end": {
+        "lat": -24.310557642517736,
+        "lng": 17.20973462633763
+      },
+      "fare": 70,
+      "status": "initiated",
+      "createdAt": "2025-10-07T09:52:27.809Z",
+      "updatedAt": "2025-10-07T09:52:27.809Z"
+    }
+  ],
+  "rideHistory": [],
+  "feedback": []
+}

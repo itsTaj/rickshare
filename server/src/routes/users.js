@@ -14,8 +14,19 @@ const controller = require('../controllers/usersController');
 const router = express.Router();
 
 router.post('/register', controller.register);
+
+router.post('/login', controller.login);
+cursor/scaffold-rickshare-project-structure-1af7
 router.get('/profile/:id', controller.getProfile);
 router.post('/profile/:id', controller.setProfile);
 router.post('/link-wallet/:id', controller.linkWallet);
 
+
+// New namespaced endpoints to support /api/users/* flow
+router.post('/users/register', controller.register);
+router.post('/users/login', controller.login);
+router.get('/users/profile/:id', controller.getProfile);
+router.post('/users/profile/:id', controller.setProfile);
+
+cursor/scaffold-rickshare-project-structure-1af7
 module.exports = router;
