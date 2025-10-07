@@ -1,0 +1,97 @@
+<!--
+  RickShare Registration (client/register.html)
+  Purpose: Frontend for user registration: mocked email OTP, profile creation, and wallet linking.
+-->
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>RickShare — Register</title>
+    <link rel="stylesheet" href="./assets/styles.css" />
+    <style>
+      .card { background: var(--panel); border: 1px solid #1f2937; border-radius: 0.75rem; padding: 1rem; }
+      .grid { display: grid; gap: 1rem; grid-template-columns: 1fr; }
+      .row { display: grid; gap: 0.25rem; }
+      .inline { display: flex; gap: 0.5rem; align-items: center; }
+      .muted { color: var(--muted); }
+    </style>
+  </head>
+  <body>
+    <header class="app-header">
+      <h1>RickShare Registration</h1>
+      <p class="subtitle">Create your rider profile and link a wallet</p>
+      <p><a href="./index.html" style="color: #fff;">← Back to app</a></p>
+    </header>
+
+    <main class="app-main">
+      <section class="card">
+        <h2>Step 1: Email + OTP (mocked)</h2>
+        <div class="grid">
+          <div class="row">
+            <label for="email">Email</label>
+            <input id="email" type="email" placeholder="you@example.com" />
+          </div>
+          <div class="row">
+            <div class="inline">
+              <input id="otp" placeholder="123456 (mock)" />
+              <button id="sendOtpBtn" type="button">Send OTP</button>
+              <button id="verifyOtpBtn" type="button">Verify & Register</button>
+            </div>
+            <small class="muted">OTP is mocked. Any value passes.</small>
+          </div>
+          <div class="row">
+            <output id="userIdOut">user: not registered</output>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2>Step 2: Profile</h2>
+        <div class="grid">
+          <div class="row">
+            <label for="name">Full name</label>
+            <input id="name" placeholder="e.g., Anika Rahman" />
+          </div>
+          <div class="row">
+            <label for="photoUrl">Photo URL</label>
+            <input id="photoUrl" placeholder="https://..." />
+          </div>
+          <div class="row">
+            <label for="emergencyContact">Emergency contact</label>
+            <input id="emergencyContact" placeholder="+8801..." />
+          </div>
+          <div class="row">
+            <button id="saveProfileBtn" type="button">Save Profile</button>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2>Step 3: Link Wallet (mocked)</h2>
+        <div class="grid">
+          <div class="row">
+            <label for="provider">Provider</label>
+            <select id="provider">
+              <option value="bKash">bKash</option>
+              <option value="Nagad">Nagad</option>
+            </select>
+          </div>
+          <div class="row">
+            <label for="account">Account</label>
+            <input id="account" placeholder="Your wallet number" />
+          </div>
+          <div class="row">
+            <button id="linkWalletBtn" type="button">Link Wallet</button>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="app-footer">
+      <small>Mock registration UI. Backend at http://localhost:4000/api</small>
+    </footer>
+
+    <script type="module" src="./src/register.js"></script>
+  </body>
+</html>

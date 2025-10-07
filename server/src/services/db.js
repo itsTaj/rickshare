@@ -2,7 +2,7 @@
  * RickShare DB Service (server/src/services/db.js)
  * Purpose: Minimal JSON-file-backed storage for demo purposes.
  * Notes:
- *  - Not for production use. Handles simple CRUD for rides.
+ *  - Not for production use. Handles simple CRUD for rides and users.
  *  - Swappable with a real database or Firebase.
  */
 
@@ -12,9 +12,15 @@ const path = require('path');
 const DB_FILE_PATH = path.join(__dirname, '..', 'db', 'mock.json');
 
 async function readDb() {
-  const raw = await fs.readFile(DB_FILE_PATH, 'utf-8');
+  let raw;
+  try {
+    raw = await fs.readFile(DB_FILE_PATH, 'utf-8');
+  } catch (_e) {
+    raw = '{}';
+  }
   const data = JSON.parse(raw || '{}');
   if (!data.rides) data.rides = [];
+  if (!data.users) data.users = [];
   return data;
 }
 
@@ -23,6 +29,7 @@ async function writeDb(data) {
   await fs.writeFile(DB_FILE_PATH, serialized, 'utf-8');
 }
 
+// ---------------- Rides ----------------
 async function getRides() {
   const db = await readDb();
   return db.rides;
@@ -50,9 +57,73 @@ async function updateRide(id, updates) {
   return updated;
 }
 
+// ---------------- Users ----------------
+async function getUsers() {
+  const db = await readDb();
+  return db.users;
+}
+
+async function addUser(user) {
+  const db = await readDb();
+  db.users.push(user);
+  await writeDb(db);
+  return user;
+}
+
+async function findUserById(id) {
+  const db = await readDb();
+  return db.users.find((u) => u.id === id) || null;
+}
+
+async function findUserByEmail(email) {
+  const db = await readDb();
+  return db.users.find((u) => u.email === email) || null;
+}
+
+async function updateUser(id, updates) {
+  const db = await readDb();
+  const index = db.users.findIndex((u) => u.id === id);
+  if (index === -1) return null;
+  const updated = { ...db.users[index], ...updates };
+  db.users[index] = updated;
+  await writeDb(db);
+  return updated;
+}
+
+async function setUserProfile(id, profile) {
+  const db = await readDb();
+  const index = db.users.findIndex((u) => u.id === id);
+  if (index === -1) return null;
+  const updated = { ...db.users[index], profile: { ...profile } };
+  db.users[index] = updated;
+  await writeDb(db);
+  return updated;
+}
+
+async function linkUserWallet(id, wallet) {
+  const db = await readDb();
+  const index = db.users.findIndex((u) => u.id === id);
+  if (index === -1) return null;
+  const existing = db.users[index];
+  const wallets = Array.isArray(existing.wallets) ? existing.wallets : [];
+  const updated = { ...existing, wallets: [...wallets, wallet] };
+  db.users[index] = updated;
+  await writeDb(db);
+  return updated;
+}
+
 module.exports = {
+  // rides
   getRides,
   addRide,
   findRideById,
   updateRide,
+  // users
+  getUsers,
+  addUser,
+  findUserById,
+  findUserByEmail,
+  updateUser,
+  setUserProfile,
+  linkUserWallet,
 };

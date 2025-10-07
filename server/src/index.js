@@ -11,6 +11,7 @@ const fs = require('fs');
 
 const errorHandler = require('./middleware/errorHandler');
 const ridesRoutes = require('./routes/rides');
+const usersRoutes = require('./routes/users');
 
 const app = express();
 const PORT = process.env.PORT || 4000;
@@ -24,11 +25,17 @@ app.get('/health', (_req, res) => res.json({ ok: true }));
 
 // API routes
 app.use('/api/rides', ridesRoutes);
+// Users & auth related endpoints
+app.use('/api', usersRoutes);
 
 // Ensure DB file exists at startup
 const dbFile = path.join(__dirname, 'db', 'mock.json');
 if (!fs.existsSync(dbFile)) {
-  fs.writeFileSync(dbFile, JSON.stringify({ rides: [] }, null, 2), 'utf-8');
+  fs.writeFileSync(
+    dbFile,
+    JSON.stringify({ rides: [], users: [] }, null, 2),
+    'utf-8'
+  );
 }
 
 // Error handler should be last
