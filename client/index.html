@@ -47,23 +47,31 @@
       </section>
 
       <section class="ride-section">
-        <h2>Create Ride (Demo)</h2>
+        <h2>Create Ride (Initiation)</h2>
         <!--
           Form: #rideForm
-          Purpose: Minimal input to demonstrate creating a ride with pickup/destination and generating a QR code.
+          Purpose: Initiate a ride by selecting start/end, entering fare, and generating a QR for ride ID.
         -->
         <form id="rideForm">
+          <div class="form-row">
+            <label for="userId">User ID</label>
+            <input id="userId" name="userId" placeholder="Paste ID from registration" />
+          </div>
           <div class="form-row">
             <label for="riderName">Your name</label>
             <input id="riderName" name="riderName" placeholder="e.g., Anika" />
           </div>
           <div class="form-row">
-            <label>Pickup (click map)</label>
+            <label>Start (click map)</label>
             <output id="pickupOutput">not set</output>
           </div>
           <div class="form-row">
-            <label>Destination (click map with Alt/Option key)</label>
+            <label>End (click map with Alt/Option key)</label>
             <output id="destinationOutput">not set</output>
+          </div>
+          <div class="form-row">
+            <label for="fare">Fare</label>
+            <input id="fare" name="fare" type="number" min="1" step="0.5" placeholder="e.g., 50" />
           </div>
           <div class="form-actions">
             <button id="createRideBtn" type="submit">Create Ride</button>

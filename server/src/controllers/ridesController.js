@@ -39,6 +39,52 @@ async function createRide(req, res, next) {
   }
 }
 
+/**
+ * POST /api/rides/create
+ * Body: {
+ *   userId: string,
+ *   start: { lat: number, lng: number },
+ *   end: { lat: number, lng: number },
+ *   fare: number
+ * }
+ * Behavior: Validates input and saves a new ride with a generated ride ID.
+ */
+async function createRideInit(req, res, next) {
+  try {
+    const { userId, start, end, fare } = req.body || {};
+
+    if (!userId || typeof userId !== 'string') {
+      return res.status(400).json({ message: 'userId is required' });
+    }
+    if (!start || typeof start.lat !== 'number' || typeof start.lng !== 'number') {
+      return res.status(400).json({ message: 'start {lat, lng} is required' });
+    }
+    if (!end || typeof end.lat !== 'number' || typeof end.lng !== 'number') {
+      return res.status(400).json({ message: 'end {lat, lng} is required' });
+    }
+    const parsedFare = Number(fare);
+    if (!Number.isFinite(parsedFare) || parsedFare <= 0) {
+      return res.status(400).json({ message: 'fare must be a positive number' });
+    }
+
+    const ride = {
+      id: uuidv4(),
+      userId,
+      start,
+      end,
+      fare: parsedFare,
+      status: 'initiated',
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
+
+    await db.addRide(ride);
+    res.status(201).json(ride);
+  } catch (err) {
+    next(err);
+  }
+}
+
 async function getRide(req, res, next) {
   try {
     const { id } = req.params;
@@ -71,6 +117,7 @@ async function updateRide(req, res, next) {
 module.exports = {
   listRides,
   createRide,
+  createRideInit,
   getRide,
   updateRide,
 };

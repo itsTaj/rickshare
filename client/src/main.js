@@ -83,9 +83,12 @@ function wireUi(map) {
   const rideForm = select('#rideForm');
   const pickupOutput = select('#pickupOutput');
   const destinationOutput = select('#destinationOutput');
+  const fareInput = select('#fare');
+  const userIdInput = select('#userId');
 
   let pickupMarker = null;
   let destinationMarker = null;
+  let routeLine = null;
 
   function setPickup(latlng) {
     if (pickupMarker) map.removeLayer(pickupMarker);
@@ -97,6 +100,15 @@ function wireUi(map) {
     if (destinationMarker) map.removeLayer(destinationMarker);
     destinationMarker = L.marker(latlng, { title: 'Destination' }).addTo(map);
     destinationOutput.textContent = formatLatLng(latlng);
+
+    // Draw polyline route when both points are present (straight line demo)
+    if (pickupMarker && destinationMarker) {
+      const start = pickupMarker.getLatLng();
+      const end = destinationMarker.getLatLng();
+      if (routeLine) map.removeLayer(routeLine);
+      routeLine = L.polyline([start, end], { color: '#22c55e', weight: 4 }).addTo(map);
+      map.fitBounds(routeLine.getBounds(), { padding: [30, 30] });
+    }
   }
 
   map.on('click', (e) => {
@@ -114,8 +126,10 @@ function wireUi(map) {
   clearMarkersBtn.addEventListener('click', () => {
     if (pickupMarker) map.removeLayer(pickupMarker);
     if (destinationMarker) map.removeLayer(destinationMarker);
+    if (routeLine) map.removeLayer(routeLine);
     pickupMarker = null;
     destinationMarker = null;
+    routeLine = null;
     pickupOutput.textContent = 'not set';
     destinationOutput.textContent = 'not set';
   });
@@ -124,23 +138,43 @@ function wireUi(map) {
     evt.preventDefault();
 
     const riderName = select('#riderName').value.trim() || 'Guest';
+    const userId = (userIdInput.value || '').trim();
     const pickup = pickupMarker ? pickupMarker.getLatLng() : null;
     const destination = destinationMarker ? destinationMarker.getLatLng() : null;
+    const fare = Number((fareInput.value || '').trim());
 
     if (!pickup) {
       alert('Please select a pickup point on the map.');
       return;
     }
+    if (!destination) {
+      alert('Please select an end point (Alt/Option+Click).');
+      return;
+    }
+    if (!Number.isFinite(fare) || fare <= 0) {
+      alert('Enter a valid fare.');
+      return;
+    }
 
     try {
-      // Minimal payload for demo
+      // Initiation payload (new endpoint)
       const payload = {
-        riderName,
-        pickup: pickup ? { lat: pickup.lat, lng: pickup.lng } : null,
-        destination: destination ? { lat: destination.lat, lng: destination.lng } : null,
+        userId: userId || 'anonymous',
+        start: { lat: pickup.lat, lng: pickup.lng },
+        end: { lat: destination.lat, lng: destination.lng },
+        fare,
       };
 
-      const created = await createRide(payload);
+      const response = await fetch(`${API_BASE}/rides/create`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+      if (!response.ok) {
+        const text = await response.text();
+        throw new Error(`Create failed: ${response.status} ${text}`);
+      }
+      const created = await response.json();
       renderQrForRideId(created.id);
       alert(`Ride created with ID ${created.id}`);
     } catch (err) {

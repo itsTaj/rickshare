@@ -1,6 +1,12 @@
 /**
  * Rides Routes (server/src/routes/rides.js)
  * Purpose: Express routes for rides.
+ * Summary of endpoints:
+ *   GET    /api/rides            -> list all rides (mock store)
+ *   POST   /api/rides            -> legacy create (pickup/destination)
+ *   POST   /api/rides/create     -> create ride with userId/start/end/fare
+ *   GET    /api/rides/:id        -> get ride by id
+ *   PATCH  /api/rides/:id        -> update ride (status/destination)
  */
 
 const express = require('express');
@@ -10,6 +16,7 @@ const router = express.Router();
 
 router.get('/', controller.listRides);
 router.post('/', controller.createRide);
+router.post('/create', controller.createRideInit);
 router.get('/:id', controller.getRide);
 router.patch('/:id', controller.updateRide);
 
